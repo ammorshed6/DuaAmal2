@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>দোয়া ও আমল</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f4f8;color:#222;min-height:100vh;overflow-x:hidden;}
+
+/* ========== LOCK SCREEN ========== */
+#lockScreen{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#0d3b1e 0%,#1a5c33 50%,#0d3b1e 100%);
+  color:white;padding:20px;
+}
+.lock-arabic{font-size:48px;letter-spacing:4px;margin-bottom:8px;color:#d4af37;text-shadow:0 2px 8px rgba(0,0,0,.5);}
+.lock-title{font-size:22px;margin-bottom:4px;color:#a8d5b5;}
+.lock-subtitle{font-size:13px;color:#6aaa80;margin-bottom:40px;}
+.lock-icon{font-size:64px;margin-bottom:20px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+
+.pin-dots{display:flex;gap:16px;margin-bottom:32px;}
+.pin-dot{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid #6aaa80;background:transparent;
+  transition:all .2s;
+}
+.pin-dot.filled{background:#d4af37;border-color:#d4af37;}
+
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:260px;}
+.pin-btn{
+  height:64px;border-radius:16px;border:1.5px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.1);color:white;font-size:22px;font-weight:600;
+  cursor:pointer;transition:all .15s;backdrop-filter:blur(4px);
+}
+.pin-btn:active,.pin-btn:hover{background:rgba(255,255,255,.25);transform:scale(.95);}
+.pin-btn.del{font-size:18px;}
+.pin-btn.empty{border:none;background:transparent;cursor:default;}
+
+.lock-msg{margin-top:16px;font-size:13px;color:#ff8080;min-height:20px;text-align:center;}
+.lock-attempt{margin-top:8px;font-size:12px;color:#aaa;}
+
+/* Setup screen */
+#setupScreen{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#0d3b1e 0%,#1a5c33 50%,#0d3b1e 100%);
+  color:white;padding:20px;
+}
+.setup-step{font-size:14px;color:#6aaa80;margin-bottom:8px;}
+.setup-title{font-size:20px;margin-bottom:32px;text-align:center;}
+
+/* ========== MAIN APP ========== */
+#mainApp{display:none;min-height:100vh;flex-direction:column;}
+.app-header{
+  background:linear-gradient(90deg,#0d3b1e,#1a5c33);
+  color:white;padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.app-header-title{font-size:16px;font-weight:700;}
+.header-actions{display:flex;gap:8px;align-items:center;}
+.btn-lock{background:rgba(255,255,255,.15);border:none;color:white;padding:6px 10px;border-radius:8px;font-size:18px;cursor:pointer;}
+.credit{background:#cc0000;color:white;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;}
+
+/* Tabs */
+.tab-bar{
+  display:flex;overflow-x:auto;background:white;
+  border-bottom:2px solid #e0e0e0;
+  position:sticky;top:52px;z-index:99;
+}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-item{
+  flex:0 0 auto;padding:10px 14px;font-size:12px;
+  border-bottom:3px solid transparent;cursor:pointer;
+  white-space:nowrap;color:#666;transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.tab-item.active{color:#1a5c33;border-bottom-color:#1a5c33;font-weight:700;}
+.tab-icon{font-size:18px;}
+
+.tab-content{display:none;padding:12px;flex:1;}
+.tab-content.active{display:block;}
+
+/* Dashboard */
+.dashboard-greeting{
+  background:linear-gradient(135deg,#1a5c33,#2d8a54);
+  color:white;border-radius:16px;padding:16px;margin-bottom:16px;
+}
+.dash-greeting-text{font-size:13px;color:#a8d5b5;margin-bottom:4px;}
+.dash-total{font-size:28px;font-weight:700;}
+.dash-total-label{font-size:12px;color:#a8d5b5;}
+
+.dash-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.dash-card{
+  background:white;border-radius:12px;padding:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.07);cursor:pointer;
+  transition:transform .2s;
+}
+.dash-card:active{transform:scale(.97);}
+.dash-card-icon{font-size:24px;margin-bottom:4px;}
+.dash-card-label{font-size:11px;color:#888;}
+.dash-card-value{font-size:16px;font-weight:700;color:#1a5c33;}
+.dash-card-count{font-size:11px;color:#aaa;}
+
+.alert-box{
+  background:#fff3cd;border:1px solid #ffc107;border-radius:12px;
+  padding:12px;margin-bottom:12px;
+}
+.alert-box-title{font-size:13px;font-weight:700;color:#856404;margin-bottom:6px;}
+.alert-item{font-size:12px;color:#856404;padding:3px 0;border-bottom:1px solid #ffeaa0;}
+.alert-item:last-child{border-bottom:none;}
+
+/* Cards/Entries */
+.section-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;
+}
+.section-title{font-size:15px;font-weight:700;color:#1a5c33;}
+.btn-add{
+  background:#1a5c33;color:white;border:none;
+  padding:8px 14px;border-radius:10px;font-size:13px;cursor:pointer;
+  display:flex;align-items:center;gap:4px;
+}
+.btn-add:active{opacity:.8;}
+
+.entry-card{
+  background:white;border-radius:12px;padding:14px;
+  margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);
+}
+.entry-header{display:flex;justify-content:space-between;align-items:flex-start;}
+.entry-title{font-size:14px;font-weight:700;color:#222;}
+.entry-subtitle{font-size:12px;color:#888;margin-top:2px;}
+.entry-actions{display:flex;gap:6px;}
+.btn-edit{background:#e8f5e9;color:#1a5c33;border:none;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;}
+.btn-del{background:#fdecea;color:#c62828;border:none;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;}
+.entry-divider{border:none;border-top:1px solid #f0f0f0;margin:10px 0;}
+.entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.entry-field{font-size:12px;}
+.entry-field-label{color:#999;font-size:11px;}
+.entry-field-value{color:#222;font-weight:600;}
+.entry-note{font-size:12px;color:#777;font-style:italic;margin-top:6px;padding:6px;background:#f9f9f9;border-radius:6px;}
+
+.expiry-badge{
+  display:inline-block;font-size:10px;padding:2px 7px;
+  border-radius:10px;margin-top:4px;font-weight:700;
+}
+.expiry-ok{background:#e8f5e9;color:#2e7d32;}
+.expiry-soon{background:#fff8e1;color:#f57f17;}
+.expiry-expired{background:#fdecea;color:#c62828;}
+
+.empty-state{text-align:center;padding:40px 20px;color:#bbb;}
+.empty-icon{font-size:48px;margin-bottom:12px;}
+.empty-text{font-size:14px;}
+
+/* Backup tab */
+.backup-card{background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.backup-title{font-size:14px;font-weight:700;margin-bottom:8px;color:#1a5c33;}
+.backup-desc{font-size:12px;color:#888;margin-bottom:12px;}
+.btn-backup{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;cursor:pointer;margin-bottom:8px;}
+.btn-export{background:#1a5c33;color:white;}
+.btn-import{background:#e8f5e9;color:#1a5c33;border:1px solid #1a5c33;}
+.btn-change-pin{background:#fff3cd;color:#856404;border:1px solid #ffc107;}
+.btn-danger{background:#fdecea;color:#c62828;border:1px solid #ef9a9a;}
+
+/* Modal */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.6);z-index:200;
+  align-items:flex-end;justify-content:center;
+}
+.modal-overlay.show{display:flex;}
+.modal-box{
+  background:white;width:100%;max-width:480px;
+  border-radius:20px 20px 0 0;padding:20px;
+  max-height:90vh;overflow-y:auto;
+  animation:slideUp .3s ease;
+}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.modal-title{font-size:16px;font-weight:700;color:#1a5c33;margin-bottom:16px;}
+.modal-close{float:right;background:none;border:none;font-size:22px;cursor:pointer;color:#999;margin-top:-4px;}
+
+.form-group{margin-bottom:12px;}
+.form-label{font-size:12px;color:#666;margin-bottom:4px;display:block;font-weight:600;}
+.form-input{
+  width:100%;padding:10px 12px;border:1.5px solid #ddd;
+  border-radius:10px;font-size:14px;outline:none;
+  font-family:inherit;
+}
+.form-input:focus{border-color:#1a5c33;}
+.form-select{
+  width:100%;padding:10px 12px;border:1.5px solid #ddd;
+  border-radius:10px;font-size:14px;background:white;outline:none;
+}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-submit{
+  width:100%;padding:13px;background:#1a5c33;color:white;
+  border:none;border-radius:12px;font-size:15px;font-weight:700;
+  cursor:pointer;margin-top:8px;
+}
+.btn-submit:active{opacity:.8;}
+.btn-cancel{
+  width:100%;padding:12px;background:#f5f5f5;color:#666;
+  border:none;border-radius:12px;font-size:14px;cursor:pointer;margin-top:6px;
+}
+
+/* Confirm Modal */
+#confirmModal{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.6);z-index:300;
+  align-items:center;justify-content:center;
+}
+#confirmModal.show{display:flex;}
+.confirm-box{
+  background:white;width:85%;max-width:320px;
+  border-radius:16px;padding:20px;text-align:center;
+}
+.confirm-icon{font-size:40px;margin-bottom:12px;}
+.confirm-title{font-size:16px;font-weight:700;margin-bottom:8px;}
+.confirm-msg{font-size:13px;color:#666;margin-bottom:20px;}
+.confirm-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.confirm-yes{background:#c62828;color:white;border:none;padding:11px;border-radius:10px;font-size:14px;cursor:pointer;}
+.confirm-no{background:#f5f5f5;color:#333;border:none;padding:11px;border-radius:10px;font-size:14px;cursor:pointer;}
+
+/* Textarea */
+textarea.form-input{resize:vertical;min-height:70px;}
+</style>
+</head>
+<body>
+
+<!-- ========== LOCK SCREEN ========== -->
+<div id="lockScreen">
+  <div class="lock-arabic">دعاء و عمل</div>
+  <div class="lock-title">দোয়া ও আমল</div>
+  <div class="lock-subtitle">আল্লাহর রহমতে প্রতিদিনের আমল</div>
+  <div class="lock-icon">🕌</div>
+  <div class="pin-dots" id="lockDots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+    <div class="pin-dot" id="d4"></div>
+    <div class="pin-dot" id="d5"></div>
+  </div>
+  <div class="pin-pad" id="pinPad">
+    <button class="pin-btn" onclick="pressPin('1')">১</button>
+    <button class="pin-btn" onclick="pressPin('2')">২</button>
+    <button class="pin-btn" onclick="pressPin('3')">৩</button>
+    <button class="pin-btn" onclick="pressPin('4')">৪</button>
+    <button class="pin-btn" onclick="pressPin('5')">৫</button>
+    <button class="pin-btn" onclick="pressPin('6')">৬</button>
+    <button class="pin-btn" onclick="pressPin('7')">৭</button>
+    <button class="pin-btn" onclick="pressPin('8')">৮</button>
+    <button class="pin-btn" onclick="pressPin('9')">৯</button>
+    <button class="pin-btn empty"></button>
+    <button class="pin-btn" onclick="pressPin('0')">০</button>
+    <button class="pin-btn del" onclick="deletePin()">⌫</button>
+  </div>
+  <div class="lock-msg" id="lockMsg"></div>
+  <div class="lock-attempt" id="lockAttempt"></div>
+</div>
+
+<!-- ========== SETUP SCREEN ========== -->
+<div id="setupScreen" style="display:none;">
+  <div class="lock-arabic">دعاء و عمل</div>
+  <div class="lock-icon">🔐</div>
+  <div class="setup-step" id="setupStep">প্রথম ধাপ</div>
+  <div class="setup-title" id="setupTitle">নতুন ৬ ডিজিটের PIN সেট করুন</div>
+  <div class="pin-dots" id="setupDots">
+    <div class="pin-dot" id="sd0"></div>
+    <div class="pin-dot" id="sd1"></div>
+    <div class="pin-dot" id="sd2"></div>
+    <div class="pin-dot" id="sd3"></div>
+    <div class="pin-dot" id="sd4"></div>
+    <div class="pin-dot" id="sd5"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-btn" onclick="pressSetupPin('1')">১</button>
+    <button class="pin-btn" onclick="pressSetupPin('2')">২</button>
+    <button class="pin-btn" onclick="pressSetupPin('3')">৩</button>
+    <button class="pin-btn" onclick="pressSetupPin('4')">৪</button>
+    <button class="pin-btn" onclick="pressSetupPin('5')">৫</button>
+    <button class="pin-btn" onclick="pressSetupPin('6')">৬</button>
+    <button class="pin-btn" onclick="pressSetupPin('7')">৭</button>
+    <button class="pin-btn" onclick="pressSetupPin('8')">৮</button>
+    <button class="pin-btn" onclick="pressSetupPin('9')">৯</button>
+    <button class="pin-btn empty"></button>
+    <button class="pin-btn" onclick="pressSetupPin('0')">০</button>
+    <button class="pin-btn del" onclick="deleteSetupPin()">⌫</button>
+  </div>
+  <div class="lock-msg" id="setupMsg"></div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
+<div id="mainApp">
+  <div class="app-header">
+    <div class="app-header-title">🌙 আমার সম্পদ ভান্ডার</div>
+    <div class="header-actions">
+      <span class="credit">@A.M.MORSHED</span>
+      <button class="btn-lock" onclick="lockApp()" title="লক করুন">🔒</button>
+    </div>
+  </div>
+
+  <div class="tab-bar" id="tabBar">
+    <div class="tab-item active" onclick="switchTab('dashboard')" id="tab-dashboard">
+      <span class="tab-icon">📊</span><span>ড্যাশবোর্ড</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('bank')" id="tab-bank">
+      <span class="tab-icon">🏦</span><span>ব্যাংক</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('sanchaypatra')" id="tab-sanchaypatra">
+      <span class="tab-icon">📜</span><span>সঞ্চয়পত্র</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('land')" id="tab-land">
+      <span class="tab-icon">🏡</span><span>জমিজমা</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('fdr')" id="tab-fdr">
+      <span class="tab-icon">💰</span><span>FDR</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('bond')" id="tab-bond">
+      <span class="tab-icon">📈</span><span>Bond</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('other')" id="tab-other">
+      <span class="tab-icon">📋</span><span>অন্যান্য</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('backup')" id="tab-backup">
+      <span class="tab-icon">☁️</span><span>ব্যাকআপ</span>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="tab-content active" id="content-dashboard">
+    <div class="dashboard-greeting">
+      <div class="dash-greeting-text">بسم الله الرحمن الرحيم — আমার মোট সম্পদ</div>
+      <div class="dash-total" id="dashTotal">৳ ০</div>
+      <div class="dash-total-label">আনুমানিক মোট আর্থিক মূল্য</div>
+    </div>
+    <div id="dashAlerts"></div>
+    <div class="dash-cards" id="dashCards"></div>
+  </div>
+
+  <!-- BANK -->
+  <div class="tab-content" id="content-bank">
+    <div class="section-header">
+      <div class="section-title">🏦 ব্যাংক হিসাব</div>
+      <button class="btn-add" onclick="openModal('bank')">+ যোগ করুন</button>
+    </div>
+    <div id="bankList"></div>
+  </div>
+
+  <!-- SANCHAYPATRA -->
+  <div class="tab-content" id="content-sanchaypatra">
+    <div class="section-header">
+      <div class="section-title">📜 সঞ্চয়পত্র</div>
+      <button class="btn-add" onclick="openModal('sanchaypatra')">+ যোগ করুন</button>
+    </div>
+    <div id="sanchaypatraList"></div>
+  </div>
+
+  <!-- LAND -->
+  <div class="tab-content" id="content-land">
+    <div class="section-header">
+      <div class="section-title">🏡 জমিজমা</div>
+      <button class="btn-add" onclick="openModal('land')">+ যোগ করুন</button>
+    </div>
+    <div id="landList"></div>
+  </div>
+
+  <!-- FDR -->
+  <div class="tab-content" id="content-fdr">
+    <div class="section-header">
+      <div class="section-title">💰 FDR</div>
+      <button class="btn-add" onclick="openModal('fdr')">+ যোগ করুন</button>
+    </div>
+    <div id="fdrList"></div>
+  </div>
+
+  <!-- BOND -->
+  <div class="tab-content" id="content-bond">
+    <div class="section-header">
+      <div class="section-title">📈 Treasury Bond</div>
+      <button class="btn-add" onclick="openModal('bond')">+ যোগ করুন</button>
+    </div>
+    <div id="bondList"></div>
+  </div>
+
+  <!-- OTHER -->
+  <div class="tab-content" id="content-other">
+    <div class="section-header">
+      <div class="section-title">📋 অন্যান্য সম্পদ</div>
+      <button class="btn-add" onclick="openModal('other')">+ যোগ করুন</button>
+    </div>
+    <div id="otherList"></div>
+  </div>
+
+  <!-- BACKUP -->
+  <div class="tab-content" id="content-backup">
+    <div class="backup-card">
+      <div class="backup-title">📤 ডেটা রপ্তানি করুন</div>
+      <div class="backup-desc">সমস্ত তথ্য এনক্রিপ্টেড JSON ফাইলে সেভ করুন।</div>
+      <button class="btn-backup btn-export" onclick="exportData()">📥 ব্যাকআপ ডাউনলোড করুন</button>
+    </div>
+    <div class="backup-card">
+      <div class="backup-title">📥 ডেটা আমদানি করুন</div>
+      <div class="backup-desc">আগের ব্যাকআপ ফাইল থেকে ডেটা পুনরুদ্ধার করুন।</div>
+      <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
+      <button class="btn-backup btn-import" onclick="document.getElementById('importFile').click()">📂 ব্যাকআপ ফাইল লোড করুন</button>
+    </div>
+    <div class="backup-card">
+      <div class="backup-title">🔑 PIN পরিবর্তন করুন</div>
+      <div class="backup-desc">আপনার ৬ ডিজিটের গোপন PIN পরিবর্তন করুন।</div>
+      <button class="btn-backup btn-change-pin" onclick="startPinChange()">🔐 PIN পরিবর্তন করুন</button>
+    </div>
+    <div class="backup-card">
+      <div class="backup-title">⚠️ সমস্ত ডেটা মুছুন</div>
+      <div class="backup-desc">সকল তথ্য চিরতরে মুছে ফেলবে। ফেরত পাওয়া যাবে না।</div>
+      <button class="btn-backup btn-danger" onclick="confirmClearAll()">🗑️ সব মুছে দিন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODALS ========== -->
+
+<!-- Bank Modal -->
+<div class="modal-overlay" id="bankModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('bank')">✕</button>
+    <div class="modal-title" id="bankModalTitle">🏦 ব্যাংক হিসাব যোগ করুন</div>
+    <input type="hidden" id="bankEditId">
+    <div class="form-group">
+      <label class="form-label">ব্যাংকের নাম *</label>
+      <input class="form-input" id="bankName" placeholder="যেমন: সোনালী ব্যাংক">
+    </div>
+    <div class="form-group">
+      <label class="form-label">শাখা</label>
+      <input class="form-input" id="bankBranch" placeholder="শাখার নাম">
+    </div>
+    <div class="form-group">
+      <label class="form-label">হিসাব নম্বর</label>
+      <input class="form-input" id="bankAcNo" placeholder="হিসাব নম্বর">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">হিসাবের ধরন</label>
+        <select class="form-select" id="bankType">
+          <option>সঞ্চয়ী</option><option>চলতি</option><option>DPS</option><option>অন্য</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ব্যালেন্স (৳)</label>
+        <input class="form-input" id="bankBalance" type="number" placeholder="০">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">নমিনি</label>
+      <input class="form-input" id="bankNominee" placeholder="নমিনির নাম">
+    </div>
+    <div class="form-group">
+      <label class="form-label">নোট</label>
+      <textarea class="form-input" id="bankNote" placeholder="অতিরিক্ত তথ্য..."></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveBank()">💾 সেভ করুন</button>
+    <button class="btn-cancel" onclick="closeModal('bank')">বাতিল</button>
+  </div>
+</div>
+
+<!-- Sanchaypatra Modal -->
+<div class="modal-overlay" id="sanchaypatraModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('sanchaypatra')">✕</button>
+    <div class="modal-title" id="sanchaypatraModalTitle">📜 সঞ্চয়পত্র যোগ করুন</div>
+    <input type="hidden" id="sanchaypatraEditId">
+    <div class="form-group">
+      <label class="form-label">সঞ্চয়পত্রের ধরন *</label>
+      <select class="form-select" id="sanchaypatraType">
+        <option>৫ বছর মেয়াদী</option>
+        <option>৩ মাস অন্তর মুনাফাভিত্তিক</option>
+        <option>পরিবার সঞ্চয়পত্র</option>
+        <option>পেনশনার সঞ্চয়পত্র</option>
+        <option>পোস্টাল সঞ্চয়পত্র</option>
+        <option>অন্যান্য</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">সিরিয়াল/সনদ নম্বর</label>
+      <input class="form-input" id="sanchaypatraSerial" placeholder="সিরিয়াল নম্বর">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">বিনিয়োগ পরিমাণ (৳)</label>
+        <input class="form-input" id="sanchaypatraAmount" type="number" placeholder="০">
+      </div>
+      <div class="form-group">
+        <label class="form-label">মুনাফার হার (%)</label>
+        <input class="form-input" id="sanchaypatraRate" type="number" step="0.01" placeholder="১১.৫২">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ক্রয় তারিখ</label>
+        <input class="form-input" id="sanchaypatraBuy" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">মেয়াদ উত্তীর্ণ</label>
+        <input class="form-input" id="sanchaypatraExpiry" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ক্রয়ের স্থান (ব্যাংক/পোস্ট অফিস)</label>
+      <input class="form-input" id="sanchaypatraPlace" placeholder="যেমন: সোনালী ব্যাংক, মতিঝিল">
+    </div>
+    <div class="form-group">
+      <label class="form-label">নমিনি</label>
+      <input class="form-input" id="sanchaypatraNominee" placeholder="নমিনির নাম">
+    </div>
+    <div class="form-group">
+      <label class="form-label">নোট</label>
+      <textarea class="form-input" id="sanchaypatraNote" placeholder="অতিরিক্ত তথ্য..."></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveSanchaypatra()">💾 সেভ করুন</button>
+    <button class="btn-cancel" onclick="closeModal('sanchaypatra')">বাতিল</button>
+  </div>
+</div>
+
+<!-- Land Modal -->
+<div class="modal-overlay" id="landModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('land')">✕</button>
+    <div class="modal-title" id="landModalTitle">🏡 জমিজমার তথ্য যোগ করুন</div>
+    <input type="hidden" id="landEditId">
+    <div class="form-group">
+      <label class="form-label">জমির বিবরণ / শিরোনাম *</label>
+      <input class="form-input" id="landTitle" placeholder="যেমন: বাড়ির ভিটা, আবাদি জমি">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">মৌজার নাম</label>
+        <input class="form-input" id="landMouza" placeholder="মৌজা">
+      </div>
+      <div class="form-group">
+        <label class="form-label">জেলা/থানা</label>
+        <input class="form-input" id="landDistrict" placeholder="জেলা">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">দাগ নম্বর</label>
+        <input class="form-input" id="landDag" placeholder="দাগ নং">
+      </div>
+      <div class="form-group">
+        <label class="form-label">খতিয়ান নম্বর</label>
+        <input class="form-input" id="landKhatian" placeholder="খতিয়ান">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">পরিমাণ</label>
+        <input class="form-input" id="landArea" placeholder="যেমন: ৫ শতাংশ">
+      </div>
+      <div class="form-group">
+        <label class="form-label">দলিল নম্বর</label>
+        <input class="form-input" id="landDeed" placeholder="দলিল নং">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ক্রয় মূল্য (৳)</label>
+        <input class="form-input" id="landBuyPrice" type="number" placeholder="০">
+      </div>
+      <div class="form-group">
+        <label class="form-label">বর্তমান মূল্য (৳)</label>
+        <input class="form-input" id="landCurrentPrice" type="number" placeholder="০">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ক্রয় তারিখ</label>
+      <input class="form-input" id="landBuyDate" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">নোট</label>
+      <textarea class="form-input" id="landNote" placeholder="অতিরিক্ত তথ্য, সীমানা, বিবাদ ইত্যাদি..."></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveLand()">💾 সেভ করুন</button>
+    <button class="btn-cancel" onclick="closeModal('land')">বাতিল</button>
+  </div>
+</div>
+
+<!-- FDR Modal -->
+<div class="modal-overlay" id="fdrModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('fdr')">✕</button>
+    <div class="modal-title" id="fdrModalTitle">💰 FDR যোগ করুন</div>
+    <input type="hidden" id="fdrEditId">
+    <div class="form-group">
+      <label class="form-label">ব্যাংকের নাম *</label>
+      <input class="form-input" id="fdrBank" placeholder="ব্যাংকের নাম">
+    </div>
+    <div class="form-group">
+      <label class="form-label">FDR নম্বর</label>
+      <input class="form-input" id="fdrNo" placeholder="FDR নম্বর">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">পরিমাণ (৳)</label>
+        <input class="form-input" id="fdrAmount" type="number" placeholder="০">
+      </div>
+      <div class="form-group">
+        <label class="form-label">সুদের হার (%)</label>
+        <input class="form-input" id="fdrRate" type="number" step="0.01" placeholder="৭.৫">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">শুরুর তারিখ</label>
+        <input class="form-input" id="fdrStart" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">মেয়াদ উত্তীর্ণ</label>
+        <input class="form-input" id="fdrExpiry" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">মেয়াদকাল</label>
+        <select class="form-select" id="fdrTenure">
+          <option>১ মাস</option><option>৩ মাস</option><option>৬ মাস</option>
+          <option>১ বছর</option><option>২ বছর</option><option>৩ বছর</option><option>অন্য</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">নবায়নযোগ্য?</label>
+        <select class="form-select" id="fdrRenew">
+          <option>হ্যাঁ</option><option>না</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">নোট</label>
+      <textarea class="form-input" id="fdrNote" placeholder="অতিরিক্ত তথ্য..."></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveFdr()">💾 সেভ করুন</button>
+    <button class="btn-cancel" onclick="closeModal('fdr')">বাতিল</button>
+  </div>
+</div>
+
+<!-- Bond Modal -->
+<div class="modal-overlay" id="bondModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('bond')">✕</button>
+    <div class="modal-title" id="bondModalTitle">📈 Treasury Bond যোগ করুন</div>
+    <input type="hidden" id="bondEditId">
+    <div class="form-group">
+      <label class="form-label">Bond-এর ধরন *</label>
+      <select class="form-select" id="bondType">
+        <option>২ বছর মেয়াদী</option>
+        <option>৫ বছর মেয়াদী</option>
+        <option>১০ বছর মেয়াদী</option>
+        <option>১৫ বছর মেয়াদী</option>
+        <option>২০ বছর মেয়াদী</option>
+        <option>Prize Bond</option>
+        <option>অন্যান্য</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">সিরিয়াল/ফলিও নম্বর</label>
+      <input class="form-input" id="bondSerial" placeholder="সিরিয়াল নম্বর">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ক্রয়মূল্য (৳)</label>
+        <input class="form-input" id="bondBuyPrice" type="number" placeholder="০">
+      </div>
+      <div class="form-group">
+        <label class="form-label">অভিহিত মূল্য (৳)</label>
+        <input class="form-input" id="bondFaceValue" type="number" placeholder="০">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">মুনাফার হার (%)</label>
+        <input class="form-input" id="bondRate" type="number" step="0.01" placeholder="১১.০">
+      </div>
+      <div class="form-group">
+        <label class="form-label">পরিমাণ (ইউনিট)</label>
+        <input class="form-input" id="bondQty" type="number" placeholder="১">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ক্রয় তারিখ</label>
+        <input class="form-input" id="bondBuyDate" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">মেয়াদ উত্তীর্ণ</label>
+        <input class="form-input" id="bondExpiry" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">নোট</label>
+      <textarea class="form-input" id="bondNote" placeholder="অতিরিক্ত তথ্য..."></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveBond()">💾 সেভ করুন</button>
+    <button class="btn-cancel" onclick="closeModal('bond')">বাতিল</button>
+  </div>
+</div>
+
+<!-- Other Modal -->
+<div class="modal-overlay" id="otherModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('other')">✕</button>
+    <div class="modal-title" id="otherModalTitle">📋 অন্যান্য সম্পদ যোগ করুন</div>
+    <input type="hidden" id="otherEditId">
+    <div class="form-group">
+      <label class="form-label">শিরোনাম *</label>
+      <input class="form-input" id="otherTitle" placeholder="যেমন: শেয়ার বিনিয়োগ, জীবন বীমা">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ধরন</label>
+      <select class="form-select" id="otherType">
+        <option>বীমা (Insurance)</option>
+        <option>শেয়ার (Stock)</option>
+        <option>মিউচুয়াল ফান্ড</option>
+        <option>ডিপোজিট পেনশন স্কিম (DPS)</option>
+        <option>গহনা/স্বর্ণ</option>
+        <option>গাড়ি/যানবাহন</option>
+        <option>পাওনা (Receivable)</option>
+        <option>অন্যান্য</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">পরিমাণ/মূল্য (৳)</label>
+        <input class="form-input" id="otherAmount" type="number" placeholder="০">
+      </div>
+      <div class="form-group">
+        <label class="form-label">পলিসি/রেফ নম্বর</label>
+        <input class="form-input" id="otherRef" placeholder="রেফারেন্স">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">শুরুর তারিখ</label>
+        <input class="form-input" id="otherStart" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">মেয়াদ উত্তীর্ণ</label>
+        <input class="form-input" id="otherExpiry" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">প্রতিষ্ঠানের নাম</label>
+      <input class="form-input" id="otherCompany" placeholder="প্রতিষ্ঠানের নাম">
+    </div>
+    <div class="form-group">
+      <label class="form-label">নোট</label>
+      <textarea class="form-input" id="otherNote" placeholder="অতিরিক্ত তথ্য..."></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveOther()">💾 সেভ করুন</button>
+    <button class="btn-cancel" onclick="closeModal('other')">বাতিল</button>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirmModal">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirmIcon">⚠️</div>
+    <div class="confirm-title" id="confirmTitle">নিশ্চিত করুন</div>
+    <div class="confirm-msg" id="confirmMsg">আপনি কি নিশ্চিত?</div>
+    <div class="confirm-btns">
+      <button class="confirm-no" onclick="closeConfirm()">না</button>
+      <button class="confirm-yes" id="confirmYes">হ্যাঁ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== CRYPTO ====================
+function xorEncrypt(text, key) {
+  let r = '';
+  for (let i = 0; i < text.length; i++)
+    r += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  return btoa(unescape(encodeURIComponent(r)));
+}
+function xorDecrypt(enc, key) {
+  try {
+    const text = decodeURIComponent(escape(atob(enc)));
+    let r = '';
+    for (let i = 0; i < text.length; i++)
+      r += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    return r;
+  } catch(e) { return null; }
+}
+function hashPin(pin) {
+  let h = 5381;
+  for (let i = 0; i < pin.length; i++) h = ((h << 5) + h) ^ pin.charCodeAt(i);
+  return (h >>> 0).toString(16);
+}
+
+// ==================== STATE ====================
+let currentPin = '';
+let appPin = '';
+let attempts = 0;
+let locked = false;
+let autoLockTimer = null;
+let data = { bank:[], sanchaypatra:[], land:[], fdr:[], bond:[], other:[] };
+
+const LOCK_KEY = 'dua_pin_hash';
+const DATA_KEY = 'dua_vault_data';
+const MAX_ATTEMPTS = 3;
+
+// ==================== INIT ====================
+window.onload = function() {
+  const storedHash = localStorage.getItem(LOCK_KEY);
+  if (!storedHash) {
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('setupScreen').style.display = 'flex';
+  } else {
+    document.getElementById('lockScreen').style.display = 'flex';
+  }
+};
+
+// ==================== LOCK SCREEN ====================
+let lockInput = '';
+function pressPin(d) {
+  if (locked || lockInput.length >= 6) return;
+  lockInput += d;
+  updateDots('d', lockInput.length);
+  if (lockInput.length === 6) {
+    setTimeout(() => verifyPin(), 200);
+  }
+}
+function deletePin() {
+  if (locked) return;
+  lockInput = lockInput.slice(0, -1);
+  updateDots('d', lockInput.length);
+  document.getElementById('lockMsg').textContent = '';
+}
+function updateDots(prefix, count) {
+  for (let i = 0; i < 6; i++) {
+    document.getElementById(prefix+i).classList.toggle('filled', i < count);
+  }
+}
+function verifyPin() {
+  const hash = hashPin(lockInput);
+  const stored = localStorage.getItem(LOCK_KEY);
+  if (hash === stored) {
+    appPin = lockInput;
+    attempts = 0;
+    lockInput = '';
+    updateDots('d', 0);
+    loadData();
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    startAutoLock();
+    renderAll();
+  } else {
+    attempts++;
+    lockInput = '';
+    updateDots('d', 0);
+    if (attempts >= MAX_ATTEMPTS) {
+      locked = true;
+      document.getElementById('lockMsg').textContent = '❌ অ্যাকাউন্ট লক হয়ে গেছে! অ্যাপ পুনরায় চালু করুন।';
+      document.getElementById('lockAttempt').textContent = '';
+    } else {
+      document.getElementById('lockMsg').textContent = `❌ ভুল PIN! আরও ${MAX_ATTEMPTS - attempts}টি সুযোগ আছে।`;
+      document.getElementById('lockAttempt').textContent = `চেষ্টা: ${attempts}/${MAX_ATTEMPTS}`;
+    }
+  }
+}
+
+// ==================== SETUP ====================
+let setupInput = '';
+let setupFirst = '';
+let setupStage = 1;
+
+function pressSetupPin(d) {
+  if (setupInput.length >= 6) return;
+  setupInput += d;
+  updateDots('sd', setupInput.length);
+  if (setupInput.length === 6) {
+    setTimeout(() => handleSetup(), 200);
+  }
+}
+function deleteSetupPin() {
+  setupInput = setupInput.slice(0, -1);
+  updateDots('sd', setupInput.length);
+}
+function handleSetup() {
+  if (setupStage === 1) {
+    setupFirst = setupInput;
+    setupInput = '';
+    updateDots('sd', 0);
+    setupStage = 2;
+    document.getElementById('setupStep').textContent = 'দ্বিতীয় ধাপ';
+    document.getElementById('setupTitle').textContent = 'PIN টি আবার লিখুন (নিশ্চিত করুন)';
+  } else {
+    if (setupInput === setupFirst) {
+      localStorage.setItem(LOCK_KEY, hashPin(setupInput));
+      appPin = setupInput;
+      setupInput = ''; setupFirst = ''; setupStage = 1;
+      document.getElementById('setupScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      loadData();
+      startAutoLock();
+      renderAll();
+    } else {
+      setupInput = ''; setupFirst = ''; setupStage = 1;
+      updateDots('sd', 0);
+      document.getElementById('setupStep').textContent = 'প্রথম ধাপ';
+      document.getElementById('setupTitle').textContent = 'নতুন ৬ ডিজিটের PIN সেট করুন';
+      document.getElementById('setupMsg').textContent = '❌ PIN মিলেনি! আবার চেষ্টা করুন।';
+      setTimeout(()=>{ document.getElementById('setupMsg').textContent=''; },2000);
+    }
+  }
+}
+
+// ==================== AUTO LOCK ====================
+function startAutoLock() {
+  resetAutoLock();
+  ['touchstart','click','keydown'].forEach(e => document.addEventListener(e, resetAutoLock, {passive:true}));
+}
+function resetAutoLock() {
+  clearTimeout(autoLockTimer);
+  autoLockTimer = setTimeout(lockApp, 120000); // 2 min
+}
+function lockApp() {
+  appPin = '';
+  lockInput = '';
+  updateDots('d', 0);
+  document.getElementById('lockMsg').textContent = '';
+  document.getElementById('lockAttempt').textContent = '';
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('lockScreen').style.display = 'flex';
+  // Close all modals
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+}
+
+// ==================== DATA ====================
+function loadData() {
+  const enc = localStorage.getItem(DATA_KEY);
+  if (!enc) { data = { bank:[], sanchaypatra:[], land:[], fdr:[], bond:[], other:[] }; return; }
+  const dec = xorDecrypt(enc, appPin);
+  if (dec) {
+    try { data = JSON.parse(dec); } catch(e) { data = { bank:[], sanchaypatra:[], land:[], fdr:[], bond:[], other:[] }; }
+  }
+}
+function saveData() {
+  const enc = xorEncrypt(JSON.stringify(data), appPin);
+  localStorage.setItem(DATA_KEY, enc);
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ==================== TABS ====================
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('content-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+}
+
+// ==================== MODALS ====================
+function openModal(type, id) {
+  clearModal(type);
+  if (id) {
+    const item = data[type].find(x => x.id === id);
+    if (item) fillModal(type, item);
+    document.getElementById(type+'ModalTitle').textContent = getModalEditTitle(type);
+    document.getElementById(type+'EditId').value = id;
+  } else {
+    document.getElementById(type+'ModalTitle').textContent = getModalAddTitle(type);
+    document.getElementById(type+'EditId').value = '';
+  }
+  document.getElementById(type+'Modal').classList.add('show');
+}
+function closeModal(type) {
+  document.getElementById(type+'Modal').classList.remove('show');
+}
+function getModalAddTitle(t) {
+  const m = {bank:'🏦 ব্যাংক হিসাব যোগ করুন',sanchaypatra:'📜 সঞ্চয়পত্র যোগ করুন',
+    land:'🏡 জমিজমার তথ্য যোগ করুন',fdr:'💰 FDR যোগ করুন',
+    bond:'📈 Treasury Bond যোগ করুন',other:'📋 অন্যান্য সম্পদ যোগ করুন'};
+  return m[t];
+}
+function getModalEditTitle(t) {
+  const m = {bank:'✏️ ব্যাংক হিসাব সম্পাদনা',sanchaypatra:'✏️ সঞ্চয়পত্র সম্পাদনা',
+    land:'✏️ জমিজমা সম্পাদনা',fdr:'✏️ FDR সম্পাদনা',
+    bond:'✏️ Treasury Bond সম্পাদনা',other:'✏️ সম্পাদনা'};
+  return m[t];
+}
+
+function clearModal(type) {
+  const fields = getFields(type);
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (!el) return;
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+}
+function fillModal(type, item) {
+  const fields = getFields(type);
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (!el || !item[f.key]) return;
+    el.value = item[f.key];
+  });
+}
+
+function getFields(type) {
+  const map = {
+    bank: [{id:'bankName',key:'name'},{id:'bankBranch',key:'branch'},{id:'bankAcNo',key:'acNo'},
+           {id:'bankType',key:'acType'},{id:'bankBalance',key:'balance'},{id:'bankNominee',key:'nominee'},{id:'bankNote',key:'note'}],
+    sanchaypatra: [{id:'sanchaypatraType',key:'type'},{id:'sanchaypatraSerial',key:'serial'},
+                   {id:'sanchaypatraAmount',key:'amount'},{id:'sanchaypatraRate',key:'rate'},
+                   {id:'sanchaypatraBuy',key:'buyDate'},{id:'sanchaypatraExpiry',key:'expiry'},
+                   {id:'sanchaypatraPlace',key:'place'},{id:'sanchaypatraNominee',key:'nominee'},{id:'sanchaypatraNote',key:'note'}],
+    land: [{id:'landTitle',key:'title'},{id:'landMouza',key:'mouza'},{id:'landDistrict',key:'district'},
+           {id:'landDag',key:'dag'},{id:'landKhatian',key:'khatian'},{id:'landArea',key:'area'},
+           {id:'landDeed',key:'deed'},{id:'landBuyPrice',key:'buyPrice'},{id:'landCurrentPrice',key:'currentPrice'},
+           {id:'landBuyDate',key:'buyDate'},{id:'landNote',key:'note'}],
+    fdr: [{id:'fdrBank',key:'bank'},{id:'fdrNo',key:'fdrNo'},{id:'fdrAmount',key:'amount'},
+          {id:'fdrRate',key:'rate'},{id:'fdrStart',key:'start'},{id:'fdrExpiry',key:'expiry'},
+          {id:'fdrTenure',key:'tenure'},{id:'fdrRenew',key:'renew'},{id:'fdrNote',key:'note'}],
+    bond: [{id:'bondType',key:'type'},{id:'bondSerial',key:'serial'},{id:'bondBuyPrice',key:'buyPrice'},
+           {id:'bondFaceValue',key:'faceValue'},{id:'bondRate',key:'rate'},{id:'bondQty',key:'qty'},
+           {id:'bondBuyDate',key:'buyDate'},{id:'bondExpiry',key:'expiry'},{id:'bondNote',key:'note'}],
+    other: [{id:'otherTitle',key:'title'},{id:'otherType',key:'type'},{id:'otherAmount',key:'amount'},
+            {id:'otherRef',key:'ref'},{id:'otherStart',key:'start'},{id:'otherExpiry',key:'expiry'},
+            {id:'otherCompany',key:'company'},{id:'otherNote',key:'note'}]
+  };
+  return map[type] || [];
+}
+
+// ==================== SAVE ====================
+function saveBank() {
+  const id = document.getElementById('bankEditId').value;
+  const name = document.getElementById('bankName').value.trim();
+  if (!name) { alert('ব্যাংকের নাম লিখুন।'); return; }
+  const item = {
+    id: id || uid(), name,
+    branch: document.getElementById('bankBranch').value,
+    acNo: document.getElementById('bankAcNo').value,
+    acType: document.getElementById('bankType').value,
+    balance: document.getElementById('bankBalance').value,
+    nominee: document.getElementById('bankNominee').value,
+    note: document.getElementById('bankNote').value
+  };
+  upsert('bank', item, id);
+  closeModal('bank'); renderList('bank'); renderDashboard();
+}
+
+function saveSanchaypatra() {
+  const id = document.getElementById('sanchaypatraEditId').value;
+  const serial = document.getElementById('sanchaypatraSerial').value.trim();
+  const item = {
+    id: id || uid(),
+    type: document.getElementById('sanchaypatraType').value,
+    serial,
+    amount: document.getElementById('sanchaypatraAmount').value,
+    rate: document.getElementById('sanchaypatraRate').value,
+    buyDate: document.getElementById('sanchaypatraBuy').value,
+    expiry: document.getElementById('sanchaypatraExpiry').value,
+    place: document.getElementById('sanchaypatraPlace').value,
+    nominee: document.getElementById('sanchaypatraNominee').value,
+    note: document.getElementById('sanchaypatraNote').value
+  };
+  upsert('sanchaypatra', item, id);
+  closeModal('sanchaypatra'); renderList('sanchaypatra'); renderDashboard();
+}
+
+function saveLand() {
+  const id = document.getElementById('landEditId').value;
+  const title = document.getElementById('landTitle').value.trim();
+  if (!title) { alert('জমির বিবরণ লিখুন।'); return; }
+  const item = {
+    id: id || uid(), title,
+    mouza: document.getElementById('landMouza').value,
+    district: document.getElementById('landDistrict').value,
+    dag: document.getElementById('landDag').value,
+    khatian: document.getElementById('landKhatian').value,
+    area: document.getElementById('landArea').value,
+    deed: document.getElementById('landDeed').value,
+    buyPrice: document.getElementById('landBuyPrice').value,
+    currentPrice: document.getElementById('landCurrentPrice').value,
+    buyDate: document.getElementById('landBuyDate').value,
+    note: document.getElementById('landNote').value
+  };
+  upsert('land', item, id);
+  closeModal('land'); renderList('land'); renderDashboard();
+}
+
+function saveFdr() {
+  const id = document.getElementById('fdrEditId').value;
+  const bank = document.getElementById('fdrBank').value.trim();
+  if (!bank) { alert('ব্যাংকের নাম লিখুন।'); return; }
+  const item = {
+    id: id || uid(), bank,
+    fdrNo: document.getElementById('fdrNo').value,
+    amount: document.getElementById('fdrAmount').value,
+    rate: document.getElementById('fdrRate').value,
+    start: document.getElementById('fdrStart').value,
+    expiry: document.getElementById('fdrExpiry').value,
+    tenure: document.getElementById('fdrTenure').value,
+    renew: document.getElementById('fdrRenew').value,
+    note: document.getElementById('fdrNote').value
+  };
+  upsert('fdr', item, id);
+  closeModal('fdr'); renderList('fdr'); renderDashboard();
+}
+
+function saveBond() {
+  const id = document.getElementById('bondEditId').value;
+  const item = {
+    id: id || uid(),
+    type: document.getElementById('bondType').value,
+    serial: document.getElementById('bondSerial').value,
+    buyPrice: document.getElementById('bondBuyPrice').value,
+    faceValue: document.getElementById('bondFaceValue').value,
+    rate: document.getElementById('bondRate').value,
+    qty: document.getElementById('bondQty').value,
+    buyDate: document.getElementById('bondBuyDate').value,
+    expiry: document.getElementById('bondExpiry').value,
+    note: document.getElementById('bondNote').value
+  };
+  upsert('bond', item, id);
+  closeModal('bond'); renderList('bond'); renderDashboard();
+}
+
+function saveOther() {
+  const id = document.getElementById('otherEditId').value;
+  const title = document.getElementById('otherTitle').value.trim();
+  if (!title) { alert('শিরোনাম লিখুন।'); return; }
+  const item = {
+    id: id || uid(), title,
+    type: document.getElementById('otherType').value,
+    amount: document.getElementById('otherAmount').value,
+    ref: document.getElementById('otherRef').value,
+    start: document.getElementById('otherStart').value,
+    expiry: document.getElementById('otherExpiry').value,
+    company: document.getElementById('otherCompany').value,
+    note: document.getElementById('otherNote').value
+  };
+  upsert('other', item, id);
+  closeModal('other'); renderList('other'); renderDashboard();
+}
+
+function upsert(type, item, id) {
+  if (id) {
+    const idx = data[type].findIndex(x => x.id === id);
+    if (idx >= 0) data[type][idx] = item; else data[type].push(item);
+  } else {
+    data[type].push(item);
+  }
+  saveData();
+}
+
+// ==================== DELETE ====================
+let pendingDelete = null;
+function deleteItem(type, id) {
+  pendingDelete = {type, id};
+  showConfirm('⚠️','মুছে ফেলবেন?','এই তথ্যটি চিরতরে মুছে যাবে।', doDelete, '#c62828');
+}
+function doDelete() {
+  if (!pendingDelete) return;
+  data[pendingDelete.type] = data[pendingDelete.type].filter(x => x.id !== pendingDelete.id);
+  saveData();
+  renderList(pendingDelete.type);
+  renderDashboard();
+  pendingDelete = null;
+  closeConfirm();
+}
+
+// ==================== CONFIRM MODAL ====================
+let confirmCallback = null;
+function showConfirm(icon, title, msg, cb, color='#c62828') {
+  document.getElementById('confirmIcon').textContent = icon;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmYes').style.background = color;
+  confirmCallback = cb;
+  document.getElementById('confirmModal').classList.add('show');
+}
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('show');
+  confirmCallback = null;
+}
+document.getElementById('confirmYes').onclick = function() { if(confirmCallback) confirmCallback(); };
+
+// ==================== EXPIRY UTILS ====================
+function expiryBadge(dateStr) {
+  if (!dateStr) return '';
+  const diff = Math.ceil((new Date(dateStr) - new Date()) / 86400000);
+  if (diff < 0) return `<span class="expiry-badge expiry-expired">মেয়াদ শেষ</span>`;
+  if (diff <= 30) return `<span class="expiry-badge expiry-soon">⚠️ ${diff} দিন বাকি</span>`;
+  return `<span class="expiry-badge expiry-ok">মেয়াদ: ${formatDate(dateStr)}</span>`;
+}
+function formatDate(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-');
+  const months = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+  return `${parseInt(day)} ${months[parseInt(m)-1]}, ${y}`;
+}
+function formatMoney(n) {
+  if (!n || n == 0) return '৳ ০';
+  return '৳ ' + parseFloat(n).toLocaleString('bn-BD');
+}
+
+// ==================== RENDER ALL ====================
+function renderAll() {
+  renderList('bank'); renderList('sanchaypatra'); renderList('land');
+  renderList('fdr'); renderList('bond'); renderList('other');
+  renderDashboard();
+}
+
+// ==================== RENDER DASHBOARD ====================
+function renderDashboard() {
+  // Total
+  let total = 0;
+  data.bank.forEach(x => total += parseFloat(x.balance)||0);
+  data.sanchaypatra.forEach(x => total += parseFloat(x.amount)||0);
+  data.land.forEach(x => total += parseFloat(x.currentPrice)||parseFloat(x.buyPrice)||0);
+  data.fdr.forEach(x => total += parseFloat(x.amount)||0);
+  data.bond.forEach(x => total += parseFloat(x.buyPrice)||0);
+  data.other.forEach(x => total += parseFloat(x.amount)||0);
+  document.getElementById('dashTotal').textContent = '৳ ' + total.toLocaleString('bn-BD');
+
+  // Cards
+  const cards = [
+    {icon:'🏦', label:'ব্যাংক হিসাব', type:'bank', valFn: d => d.reduce((s,x)=>s+(parseFloat(x.balance)||0),0)},
+    {icon:'📜', label:'সঞ্চয়পত্র', type:'sanchaypatra', valFn: d => d.reduce((s,x)=>s+(parseFloat(x.amount)||0),0)},
+    {icon:'🏡', label:'জমিজমা', type:'land', valFn: d => d.reduce((s,x)=>s+(parseFloat(x.currentPrice)||parseFloat(x.buyPrice)||0),0)},
+    {icon:'💰', label:'FDR', type:'fdr', valFn: d => d.reduce((s,x)=>s+(parseFloat(x.amount)||0),0)},
+    {icon:'📈', label:'Treasury Bond', type:'bond', valFn: d => d.reduce((s,x)=>s+(parseFloat(x.buyPrice)||0),0)},
+    {icon:'📋', label:'অন্যান্য', type:'other', valFn: d => d.reduce((s,x)=>s+(parseFloat(x.amount)||0),0)},
+  ];
+  let cardHTML = '';
+  cards.forEach(c => {
+    const list = data[c.type];
+    const val = c.valFn(list);
+    cardHTML += `<div class="dash-card" onclick="switchTab('${c.type}')">
+      <div class="dash-card-icon">${c.icon}</div>
+      <div class="dash-card-label">${c.label}</div>
+      <div class="dash-card-value">৳ ${val.toLocaleString('bn-BD')}</div>
+      <div class="dash-card-count">${list.length} টি এন্ট্রি</div>
+    </div>`;
+  });
+  document.getElementById('dashCards').innerHTML = cardHTML;
+
+  // Alerts
+  const today = new Date();
+  let alerts = [];
+  [...data.sanchaypatra, ...data.fdr, ...data.bond, ...data.other].forEach(x => {
+    const exp = x.expiry;
+    if (!exp) return;
+    const diff = Math.ceil((new Date(exp) - today) / 86400000);
+    if (diff >= 0 && diff <= 60) {
+      const name = x.name || x.type || x.bank || x.title || 'আইটেম';
+      alerts.push({name, diff, date: formatDate(exp)});
+    }
+  });
+  let alertHTML = '';
+  if (alerts.length > 0) {
+    alertHTML = `<div class="alert-box"><div class="alert-box-title">⚠️ মেয়াদ উত্তীর্ণের সতর্কতা (${alerts.length}টি)</div>`;
+    alerts.forEach(a => {
+      alertHTML += `<div class="alert-item">📅 ${a.name} — ${a.diff === 0 ? 'আজই মেয়াদ শেষ!' : a.diff + ' দিন বাকি'} (${a.date})</div>`;
+    });
+    alertHTML += '</div>';
+  }
+  document.getElementById('dashAlerts').innerHTML = alertHTML;
+}
+
+// ==================== RENDER LISTS ====================
+function renderList(type) {
+  const container = document.getElementById(type+'List');
+  const list = data[type];
+  if (!list || list.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">কোনো তথ্য নেই।<br>উপরের বাটনে ক্লিক করে যোগ করুন।</div></div>`;
+    return;
+  }
+  let html = '';
+  list.forEach(item => { html += renderCard(type, item); });
+  container.innerHTML = html;
+}
+
+function renderCard(type, item) {
+  let title='', subtitle='', fields='', note='', badge='';
+  if (type === 'bank') {
+    title = item.name; subtitle = (item.branch||'') + (item.acType?' · '+item.acType:'');
+    fields = `
+      <div class="entry-field"><div class="entry-field-label">হিসাব নম্বর</div><div class="entry-field-value">${item.acNo||'—'}</div></div>
+      <div class="entry-field"><div class="entry-field-label">ব্যালেন্স</div><div class="entry-field-value">${formatMoney(item.balance)}</div></div>
+      <div class="entry-field"><div class="entry-field-label">নমিনি</div><div class="entry-field-value">${item.nominee||'—'}</div></div>`;
+  } else if (type === 'sanchaypatra') {
+    title = item.type; subtitle = item.serial ? 'সিরিয়াল: '+item.serial : '';
+    badge = expiryBadge(item.expiry);
+    fields = `
+      <div class="entry-field"><div class="entry-field-label">বিনিয়োগ</div><div class="entry-field-value">${formatMoney(item.amount)}</div></div>
+      <div class="entry-field"><div class="entry-field-label">মুনাফার হার</div><div class="entry-field-value">${item.rate||'—'}%</div></div>
+      <div class="entry-field"><div class="entry-field-label">ক্রয় তারিখ</div><div class="entry-field-value">${formatDate(item.buyDate)}</div></div>
+      <div class="entry-field"><div class="entry-field-label">নমিনি</div><div class="entry-field-value">${item.nominee||'—'}</div></div>
+      <div class="entry-field"><div class="entry-field-label">স্থান</div><div class="entry-field-value">${item.place||'—'}</div></div>`;
+  } else if (type === 'land') {
+    title = item.title; subtitle = [item.mouza, item.district].filter(Boolean).join(', ');
+    fields = `
+      <div class="entry-field"><div class="entry-field-label">দাগ নম্বর</div><div class="entry-field-value">${item.dag||'—'}</div></div>
+      <div class="entry-field"><div class="entry-field-label">খতিয়ান</div><div class="entry-field-value">${item.khatian||'—'}</div></div>
+      <div class="entry-field"><div class="entry-field-label">পরিমাণ</div><div class="entry-field-value">${item.area||'—'}</div></div>
+      <div class="entry-field"><div class="entry-field-label">দলিল নম্বর</div><div class="entry-field-value">${item.deed||'—'}</div></div>
+      <div class="entry-field"><div class="entry-field-label">ক্রয় মূল্য</div><div class="entry-field-value">${formatMoney(item.buyPrice)}</div></div>
+      <div class="entry-field"><div class="entry-field-label">বর্তমান মূল্য</div><div class="entry-field-value">${formatMoney(item.currentPrice)}</div></div>`;
+  } else if (type === 'fdr') {
+    title = item.bank; subtitle = item.fdrNo ? 'FDR নং: '+item.fdrNo : '';
+    badge = expiryBadge(item.expiry);
+    fields = `
+      <div class="entry-field"><div class="entry-field-label">পরিমাণ</div><div class="entry-field-value">${formatMoney(item.amount)}</div></div>
+      <div class="entry-field"><div class="entry-field-label">সুদের হার</div><div class="entry-field-value">${item.rate||'—'}%</div></div>
+      <div class="entry-field"><div class="entry-field-label">মেয়াদকাল</div><div class="entry-field-value">${item.tenure||'—'}</div></div>
+      <div class="entry-field"><div class="entry-field-label">নবায়নযোগ্য</div><div class="entry-field-value">${item.renew||'—'}</div></div>
+      <div class="entry-field"><div class="entry-field-label">শুরু</div><div class="entry-field-value">${formatDate(item.start)}</div></div>`;
+  } else if (type === 'bond') {
+    title = item.type; subtitle = item.serial ? 'সিরিয়াল: '+item.serial : '';
+    badge = expiryBadge(item.expiry);
+    fields = `
+      <div class="entry-field"><div class="entry-field-label">ক্রয়মূল্য</div><div class="entry-field-value">${formatMoney(item.buyPrice)}</div></div>
+      <div class="entry-field"><div class="entry-field-label">অভিহিত মূল্য</div><div class="entry-field-value">${formatMoney(item.faceValue)}</div></div>
+      <div class="entry-field"><div class="entry-field-label">মুনাফার হার</div><div class="entry-field-value">${item.rate||'—'}%</div></div>
+      <div class="entry-field"><div class="entry-field-label">পরিমাণ</div><div class="entry-field-value">${item.qty||'—'} ইউনিট</div></div>
+      <div class="entry-field"><div class="entry-field-label">ক্রয় তারিখ</div><div class="entry-field-value">${formatDate(item.buyDate)}</div></div>`;
+  } else if (type === 'other') {
+    title = item.title; subtitle = item.type + (item.company ? ' · '+item.company : '');
+    badge = expiryBadge(item.expiry);
+    fields = `
+      <div class="entry-field"><div class="entry-field-label">পরিমাণ/মূল্য</div><div class="entry-field-value">${formatMoney(item.amount)}</div></div>
+      <div class="entry-field"><div class="entry-field-label">রেফারেন্স</div><div class="entry-field-value">${item.ref||'—'}</div></div>`;
+  }
+  note = item.note ? `<div class="entry-note">📝 ${item.note}</div>` : '';
+  return `
+  <div class="entry-card">
+    <div class="entry-header">
+      <div><div class="entry-title">${title}</div><div class="entry-subtitle">${subtitle}</div>${badge}</div>
+      <div class="entry-actions">
+        <button class="btn-edit" onclick="openModal('${type}','${item.id}')">✏️</button>
+        <button class="btn-del" onclick="deleteItem('${type}','${item.id}')">🗑️</button>
+      </div>
+    </div>
+    <hr class="entry-divider">
+    <div class="entry-grid">${fields}</div>
+    ${note}
+  </div>`;
+}
+
+// ==================== BACKUP ====================
+function exportData() {
+  const raw = JSON.stringify({data, ts: new Date().toISOString(), app:'DuaAmal'});
+  const enc = xorEncrypt(raw, appPin);
+  const blob = new Blob([JSON.stringify({enc})], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'duaamal_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const obj = JSON.parse(e.target.result);
+      const dec = xorDecrypt(obj.enc, appPin);
+      if (!dec) { showConfirm('❌','ত্রুটি','ব্যাকআপ ফাইলটি আপনার PIN দিয়ে ডিক্রিপ্ট করা যাচ্ছে না।',closeConfirm,'#c62828'); return; }
+      const parsed = JSON.parse(dec);
+      data = parsed.data;
+      saveData();
+      renderAll();
+      showConfirm('✅','সফল!','ব্যাকআপ থেকে সমস্ত তথ্য পুনরুদ্ধার হয়েছে।',closeConfirm,'#1a5c33');
+    } catch(err) {
+      showConfirm('❌','ত্রুটি','ফাইল পড়তে সমস্যা হয়েছে।',closeConfirm,'#c62828');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ==================== CHANGE PIN ====================
+let changePinStage = 0;
+let changePinFirst = '';
+let changePinInput = '';
+function startPinChange() {
+  changePinStage = 1;
+  changePinFirst = '';
+  changePinInput = '';
+  showChangePinModal();
+}
+function showChangePinModal() {
+  // Reuse setup screen temporarily
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('setupScreen').style.display = 'flex';
+  document.getElementById('setupStep').textContent = changePinStage === 0 ? 'যাচাই' : (changePinStage === 1 ? 'নতুন PIN' : 'নিশ্চিত করুন');
+  document.getElementById('setupTitle').textContent = changePinStage === 0 ? 'বর্তমান PIN লিখুন' : (changePinStage === 1 ? 'নতুন PIN লিখুন' : 'নতুন PIN আবার লিখুন');
+  updateDots('sd',0);
+  setupInput = '';
+  // Override pressSetupPin temporarily
+  window._origPressSetupPin = pressSetupPin;
+  window._origDeleteSetupPin = deleteSetupPin;
+  window.pressSetupPin = pressChangePinDigit;
+  window.deleteSetupPin = deleteChangePinDigit;
+}
+function pressChangePinDigit(d) {
+  if (changePinInput.length >= 6) return;
+  changePinInput += d;
+  updateDots('sd', changePinInput.length);
+  if (changePinInput.length === 6) setTimeout(handleChangePinStep, 200);
+}
+function deleteChangePinDigit() {
+  changePinInput = changePinInput.slice(0,-1);
+  updateDots('sd', changePinInput.length);
+}
+function handleChangePinStep() {
+  if (changePinStage === 1) {
+    changePinFirst = changePinInput;
+    changePinInput = '';
+    updateDots('sd',0);
+    changePinStage = 2;
+    document.getElementById('setupStep').textContent = 'নিশ্চিত করুন';
+    document.getElementById('setupTitle').textContent = 'নতুন PIN আবার লিখুন';
+  } else {
+    if (changePinInput === changePinFirst) {
+      // Re-encrypt data with new pin
+      const newPin = changePinInput;
+      const raw = JSON.stringify(data);
+      const enc = xorEncrypt(raw, newPin);
+      localStorage.setItem(DATA_KEY, enc);
+      localStorage.setItem(LOCK_KEY, hashPin(newPin));
+      appPin = newPin;
+      // Restore
+      window.pressSetupPin = window._origPressSetupPin;
+      window.deleteSetupPin = window._origDeleteSetupPin;
+      document.getElementById('setupScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      changePinStage = 0; changePinInput = ''; changePinFirst = '';
+      showConfirm('✅','সফল!','PIN সফলভাবে পরিবর্তন হয়েছে।',closeConfirm,'#1a5c33');
+    } else {
+      changePinInput = ''; changePinFirst = ''; changePinStage = 1;
+      updateDots('sd',0);
+      document.getElementById('setupMsg').textContent = '❌ PIN মিলেনি!';
+      document.getElementById('setupStep').textContent = 'নতুন PIN';
+      document.getElementById('setupTitle').textContent = 'নতুন PIN লিখুন (আবার)';
+      setTimeout(()=>{ document.getElementById('setupMsg').textContent=''; },2000);
+    }
+  }
+}
+
+// ==================== CLEAR ALL ====================
+function confirmClearAll() {
+  showConfirm('⚠️','সব মুছে দেবেন?','সমস্ত তথ্য চিরতরে মুছে যাবে। এটি ফেরত পাওয়া যাবে না!', doClearAll, '#c62828');
+}
+function doClearAll() {
+  localStorage.removeItem(DATA_KEY);
+  data = { bank:[], sanchaypatra:[], land:[], fdr:[], bond:[], other:[] };
+  renderAll();
+  closeConfirm();
+}
+</script>
+</body>
+</html>
